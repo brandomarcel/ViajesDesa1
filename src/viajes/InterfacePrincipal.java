@@ -5,6 +5,20 @@
  */
 package viajes;
 
+import com.mysql.jdbc.Connection;
+import conexion.conexion;
+import java.awt.Dimension;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JInternalFrame;
+import javax.swing.JOptionPane;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.view.JasperViewer;
+
 /**
  *
  * @author Bmarc
@@ -16,9 +30,21 @@ public class InterfacePrincipal extends javax.swing.JFrame {
      */
     public InterfacePrincipal() {
         initComponents();
-        
+        jdeskprincipal.setBorder(new imagenfondo());
+        this.setExtendedState(MAXIMIZED_BOTH);
     }
-
+public boolean VentanaCerrada(Object obj) {
+        JInternalFrame[] activos = jdeskprincipal.getAllFrames();
+        boolean cerrado = true;
+        int i = 0;
+        while (i < activos.length && cerrado) {
+            if (activos[i] == obj) {
+                cerrado = false;
+            }
+            i++;
+        }
+        return cerrado;
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -33,6 +59,7 @@ public class InterfacePrincipal extends javax.swing.JFrame {
         jmenuitemVehiculos = new javax.swing.JMenu();
         jMenuItem1 = new javax.swing.JMenuItem();
         jmenuReportes = new javax.swing.JMenu();
+        jMenuReporteAutos = new javax.swing.JMenuItem();
         jmenuSalir = new javax.swing.JMenu();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -41,11 +68,11 @@ public class InterfacePrincipal extends javax.swing.JFrame {
         jdeskprincipal.setLayout(jdeskprincipalLayout);
         jdeskprincipalLayout.setHorizontalGroup(
             jdeskprincipalLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 934, Short.MAX_VALUE)
+            .addGap(0, 1697, Short.MAX_VALUE)
         );
         jdeskprincipalLayout.setVerticalGroup(
             jdeskprincipalLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 515, Short.MAX_VALUE)
+            .addGap(0, 890, Short.MAX_VALUE)
         );
 
         jmenuitemVehiculos.setText("Interfaces");
@@ -66,6 +93,15 @@ public class InterfacePrincipal extends javax.swing.JFrame {
         jmenuInterfaces.add(jmenuitemVehiculos);
 
         jmenuReportes.setText("Reportes");
+
+        jMenuReporteAutos.setText("Autos");
+        jMenuReporteAutos.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuReporteAutosActionPerformed(evt);
+            }
+        });
+        jmenuReportes.add(jMenuReporteAutos);
+
         jmenuInterfaces.add(jmenuReportes);
 
         jmenuSalir.setText("Salir");
@@ -86,7 +122,7 @@ public class InterfacePrincipal extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
+InterfaceAuto au;
     private void jmenuitemVehiculosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jmenuitemVehiculosActionPerformed
         // TODO add your handling code here:
         
@@ -94,10 +130,38 @@ public class InterfacePrincipal extends javax.swing.JFrame {
 
     private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
         // TODO add your handling code here:
-        InterfaceAuto ventanaAuto= new InterfaceAuto();
-        jdeskprincipal.add(ventanaAuto);
-        ventanaAuto.show();
+        if (VentanaCerrada(au)) {
+            au = new InterfaceAuto();
+            jdeskprincipal.add(au);
+            au.setVisible(true);
+            au.setResizable(false);
+            //Centrar la ventana Autos
+            Dimension desktopSize = jdeskprincipal.getSize();
+            Dimension FrameSize = au.getSize();
+            au.setLocation((desktopSize.width - FrameSize.width) / 2, (desktopSize.height - FrameSize.height) / 2);
+            au.show();
+            //
+        } else {
+            JOptionPane.showMessageDialog(null, "La ventana ya esta abierta");
+        }
     }//GEN-LAST:event_jMenuItem1ActionPerformed
+
+    private void jMenuReporteAutosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuReporteAutosActionPerformed
+        try {
+            // TODO add your handling code here:
+            //conectarme
+            conexion cc = new conexion();
+            Connection cn = cc.conectar();
+            JasperReport  reporte = JasperCompileManager.compileReport("C:\\Users\\Bmarc\\Documents\\NetBeansProjects\\Viajes\\src\\Reportes\\reporteAutos.jrxml");
+            //JasperReport  reporte = JasperCompileManager.compileReport("C:\\Users\\Bmarc\\Documents\\NetBeansProjects\\Viajes\\src\\Reportes\\reportgrafico.jrxml");
+            
+            JasperPrint print = JasperFillManager.fillReport(reporte,null,cn);
+            JasperViewer.viewReport(print);
+        } catch (JRException ex) {
+            Logger.getLogger(InterfacePrincipal.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    }//GEN-LAST:event_jMenuReporteAutosActionPerformed
 
     /**
      * @param args the command line arguments
@@ -136,9 +200,10 @@ public class InterfacePrincipal extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem jMenuItem1;
+    private javax.swing.JMenuItem jMenuReporteAutos;
     public static javax.swing.JDesktopPane jdeskprincipal;
     private javax.swing.JMenuBar jmenuInterfaces;
-    private javax.swing.JMenu jmenuReportes;
+    public static javax.swing.JMenu jmenuReportes;
     private javax.swing.JMenu jmenuSalir;
     private javax.swing.JMenu jmenuitemVehiculos;
     // End of variables declaration//GEN-END:variables

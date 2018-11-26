@@ -7,21 +7,31 @@ package viajes;
 
 import com.mysql.jdbc.Connection;
 import conexion.conexion;
+import java.awt.Dimension;
 import java.awt.event.ItemEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JComboBox;
 import javax.swing.JInternalFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JSpinner;
+import javax.swing.KeyStroke;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableColumn;
+import static viajes.InterfacePrincipal.jdeskprincipal;
 
 
 /**
@@ -36,7 +46,8 @@ public class InterfaceAuto extends JInternalFrame {
      */
     public InterfaceAuto() {
         initComponents();
-        cargarTablaAutos("");
+            CargarTablaAutosControles("");
+        //cargarTablaAutos("");
         cargarColor();
         desactivarTextos();
         desactivarBotones();
@@ -44,11 +55,20 @@ public class InterfaceAuto extends JInternalFrame {
         jcbxMarca.addItem("Seleccione...");
         cargarComboMarca();    
         limpiarTextos();
-        cargarmodificar();
-     
+       cargarmodificar();
+        
+        datosTablacargar(1,jcbxMarca);
+       datosTablacargar(2,jcbxModelo);
+       datosTablacargar(4,jcbxColor);
         
         
-        
+    }
+    
+    public void datosTablacargar(int col, JComboBox combo){
+         JComboBox jcb = new JComboBox(combo.getModel());
+        TableColumn tc = jtblAutos.getColumnModel().getColumn(col);
+        TableCellEditor tce = new DefaultCellEditor(jcb);
+        tc.setCellEditor(tce);
     }
     
     public void cargarColor(){
@@ -96,6 +116,7 @@ public class InterfaceAuto extends JInternalFrame {
         spnCapacidad.setEnabled(false);
         txtDescripcion.setEnabled(false);
         jcbxMarca.setEnabled(false);
+        
                
         
     }
@@ -107,6 +128,7 @@ public class InterfaceAuto extends JInternalFrame {
         btnCancelar.setEnabled(false);
         btnBorrar.setEnabled(false);
         btnSalir.setEnabled(true);
+       // jbtnViaje.setEnabled(false);
     }
       public void activarBotones(){
         btnNuevo.setEnabled(false);
@@ -115,7 +137,9 @@ public class InterfaceAuto extends JInternalFrame {
         btnCancelar.setEnabled(true);
         btnBorrar.setEnabled(false);
         btnSalir.setEnabled(true);
+        jbtnViaje.setEnabled(true);
     }
+  
       
       public void actualizarBotones(){
         btnNuevo.setEnabled(false);
@@ -124,12 +148,13 @@ public class InterfaceAuto extends JInternalFrame {
         btnCancelar.setEnabled(true);
         btnBorrar.setEnabled(true);
         btnSalir.setEnabled(true);  
+        jbtnViaje.setEnabled(true);
       }
       public void guardar(){
           String sql;
-          sql =" INSERT INTO AUTOS VALUES(?,?,?,?,?,?)";
+          sql =" INSERT INTO AUTOS VALUES(?,?,?,?,?,?,?)";
           
-          if (txtPlaca.getText().isEmpty()) {
+          if (txtPlaca.getText()=="   -    ") {
               JOptionPane.showMessageDialog(this, "Ingrese Placa");
               
                     txtPlaca.requestFocus();
@@ -151,7 +176,7 @@ public class InterfaceAuto extends JInternalFrame {
               
           
           }else{
-{
+
           
         try {
             PreparedStatement psd = cn.prepareStatement(sql);
@@ -171,6 +196,7 @@ public class InterfaceAuto extends JInternalFrame {
             }else{
             psd.setString(6, txtDescripcion.getText());
             }
+            psd.setString(7, "1");
             
             
             psd.executeUpdate();
@@ -183,7 +209,7 @@ public class InterfaceAuto extends JInternalFrame {
         } catch (SQLException ex) {
             //JOptionPane.showMessageDialog(null, "NO VALE");
         }
-}
+
           }
       }
       
@@ -204,7 +230,9 @@ public class InterfaceAuto extends JInternalFrame {
         }
         return idmodelo1;
     }
-
+      
+     
+ 
       
       public void cargarComboMarca(){
           String sql;
@@ -257,15 +285,32 @@ public class InterfaceAuto extends JInternalFrame {
  
       
     
-    
+    public String devolverCodigoTabla(String dato) {
+
+         String idmodelo1 = "";
+        String sql = "select MOD_CODIGO from modelo where MOD_NOMBRE='" + jcbxModelo.getSelectedItem() + "'";
+        try {
+            Statement psd = cn.createStatement();
+            ResultSet rs = psd.executeQuery(sql);
+            while (rs.next()) {
+
+                idmodelo1 = rs.getString("MOD_CODIGO");
+
+            }
+
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, ex);
+        }
+        return idmodelo1;
+    }
        public void cargarTablaAutos(String dato){
            try {
-            String [] titulos={"PLACA","MARCA","MODELO","AÑO","COLOR","CAPACIDAD","DESCRIPCION"};
+            String [] titulos={"PLACA","MARCA","MODELO","ANO","COLOR","CAPACIDAD","DESCRIPCION"};
             String [] registros = new String[7];
             String sql;
             sql="SELECT AUTOS.AUT_PLACA, MARCA.MAR_NOMBRE, MODELO.MOD_NOMBRE, AUTOS.AUT_ANIO, AUTOS.AUT_COLOR, AUTOS.AUT_CAPACIDAD, AUTOS.AUT_DESCRIPCION "
                     + "FROM AUTOS, MARCA, MODELO "
-                    + "WHERE AUTOS.MOD_CODIGO = MODELO.MOD_CODIGO AND MODELO.MAR_CODIGO = MARCA.MAR_CODIGO AND AUTOS.AUT_PLACA LIKE'%" +dato+"%' ";
+                    + "WHERE AUTOS.MOD_CODIGO = MODELO.MOD_CODIGO AND MODELO.MAR_CODIGO = MARCA.MAR_CODIGO AND AUTOS.AUT_PLACA LIKE'%" +dato+"%' AND AUT_ESTADO = '1' ";
             model = new DefaultTableModel(null,titulos);
             Statement psd = cn.createStatement();
             ResultSet rs = psd.executeQuery(sql);
@@ -282,6 +327,11 @@ public class InterfaceAuto extends JInternalFrame {
                  
                               
 jtblAutos.setModel(model);
+
+
+//     
+        
+            
                 
            model.addTableModelListener(new TableModelListener() {
                 @Override
@@ -292,8 +342,12 @@ jtblAutos.setModel(model);
                         String colname = null;
                         
                         
-                        if (columna == 3) {
-                        colname="AUT_ANIO";   
+                         if (columna == 2) {
+                        colname="MOD_CODIGO";
+                        
+                        }else if (columna == 3) {
+                        colname="AUT_ANIO"; 
+                                            
                         }else if(columna == 4){
                         colname="AUT_COLOR";
                         }else if(columna == 5){
@@ -302,39 +356,126 @@ jtblAutos.setModel(model);
                             colname="AUT_DESCRIPCION";
                         }
                         
-                        String sql=" UPDATE AUTOS SET "+colname+" = '"+ jtblAutos.getValueAt(fila, columna)+"' WHERE AUT_PLACA ='"+jtblAutos.getValueAt(fila, 0)+"'";                   
-                PreparedStatement psd;
+                       String f;
+                        f = model.getValueAt(tme.getFirstRow(), tme.getColumn()).toString();
+                        if (colname.equals("MOD_CODIGO")) {
+                            f = devolverCodigoTabla(model.getValueAt(tme.getFirstRow(), tme.getColumn()).toString());
+                       // JOptionPane.showMessageDialog(null, f);
+                        }
+                        
+                       // String sql=" UPDATE VIAJES SET "+colname+" = '"+ jtblViajes.getValueAt(fila, columna)+"' WHERE AUT_PLACA ='"+jtblViajes.getValueAt(fila, 1)+"' AND VIA_CODIGO='"+jtblViajes.getValueAt(fila, 0)+"'";                   
+                                  String sql = ("UPDATE AUTOS SET " + colname + "='" + f + "' WHERE AUT_PLACA='" + model.getValueAt(tme.getFirstRow(), 0) + "'");
+                        PreparedStatement psd;
                             try {
                                 psd = cn.prepareStatement(sql);
                                 psd.executeUpdate();
                             } catch (SQLException ex) {
-                                Logger.getLogger(InterfaceAuto.class.getName()).log(Level.SEVERE, null, ex);
+                                //JOptionPane.showMessageDialog(null, ex+"No valio");
                             }
-                   desactivarTextos();
-            limpiarTextos();
+              //     desactivarTextos();
+            //limpiarTextos();
             desactivarBotones();
                        
                        
                         
                     }
                    
-//                    else if(columna == 4){
-//                        String sql=" UPDATE AUTOS SET AUT_COLOR= '"+ jtblAutos.getValueAt(fila, columna)+"' WHERE AUT_PLACA ='"+jtblAutos.getValueAt(fila, 0)+"'";
-                    //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
                 }
                 
                 
-            });
+            });       
            
-           jtblAutos.setModel(model);
-                 
-           
-           } catch (SQLException ex) {
-            Logger.getLogger(InterfaceAuto.class.getName()).log(Level.SEVERE, null, ex);
+           jtblAutos.setCellSelectionEnabled(true);
+            jtblAutos.getInputMap(javax.swing.JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
+            jtblAutos.setModel(model);
+            jtblAutos.getTableHeader().setReorderingAllowed(false);
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, ex + "SBBNSJSDJN");
         }
-        
-       }
+
+           
+    }
        
+       //TENEMOS QUE CORREGIR
+       
+       public void CargarTablaAutosControles(String dato) {
+
+        conexion cc = new conexion();
+        Connection cn = cc.conectar();
+        String sql = "SELECT AUTOS.AUT_PLACA, MARCA.MAR_NOMBRE, MODELO.MOD_NOMBRE, AUTOS.AUT_ANIO,AUTOS.AUT_COLOR, AUTOS.AUT_CAPACIDAD, AUTOS.AUT_DESCRIPCION FROM AUTOS,MODELO,MARCA WHERE AUTOS.AUT_PLACA LIKE '%" + dato + "%' AND AUTOS.MOD_CODIGO=MODELO.MOD_CODIGO AND MARCA.MAR_CODIGO=MODELO.MAR_CODIGO";
+        try {
+            Statement psd = cn.createStatement();
+            ResultSet rs = psd.executeQuery(sql);
+            model = new DefaultTableModel(new Object[][][][][][]{}, new String[]{"PLACA", "MARCA", "MODELO", "ANO", "COLOR", "CAPACIDAD", "DESCRIPCION"}) {
+                @Override
+                public boolean isCellEditable(int row, int col) {
+                    return (col != 0 && col != 1);
+                }
+            };
+            while (rs.next()) {
+                model.addRow(new String[]{
+                    rs.getString("AUTOS.AUT_PLACA"),
+                    rs.getString("MARCA.MAR_NOMBRE"),
+                    rs.getString("MODELO.MOD_NOMBRE"),
+                    rs.getString("AUTOS.AUT_ANIO"),
+                    rs.getString("AUTOS.AUT_COLOR"),
+                    rs.getString("AUTOS.AUT_CAPACIDAD"),
+                    rs.getString("AUTOS.AUT_DESCRIPCION")
+                });
+            }
+            model.addTableModelListener(new TableModelListener() {
+                @Override
+                public void tableChanged(TableModelEvent e) {
+                    if (e.getType() == TableModelEvent.UPDATE) {
+
+                        String colname = "";
+                        if (e.getColumn() == 2) {
+                            colname = "MOD_CODIGO";
+                        } else if (e.getColumn() == 3) {
+                            colname = "AUT_ANIO";
+                        } else if (e.getColumn() == 4) {
+                            colname = "AUT_COLOR";
+                        } else if (e.getColumn() == 5) {
+                            colname = "AUT_CAPACIDAD";
+                        } else if (e.getColumn() == 6) {
+                            colname = "AUT_DESCRIPCION";
+                        }
+                      
+                        String f;
+                        
+                        f = model.getValueAt(e.getFirstRow(), e.getColumn()).toString();
+                        if (colname.equals("MOD_CODIGO")) {
+                            f = devolverCodigoTabla(model.getValueAt(e.getFirstRow(), e.getColumn()).toString());
+                       // JOptionPane.showMessageDialog(null, f);
+                        }
+
+                        String sql = ("UPDATE AUTOS SET " + colname + "='" + f + "' WHERE AUT_PLACA='" + model.getValueAt(e.getFirstRow(), 0) + "'");
+                        conexion cc = new conexion();
+                        Connection cn = cc.conectar();
+                        
+                        PreparedStatement pst;
+                        try {
+                            pst = cn.prepareStatement(sql);
+                            int rows = pst.executeUpdate();
+                        } catch (SQLException ex) {
+                           // Logger.getLogger(InterfaceAuto.class.getName()).log(Level.SEVERE, null, ex);
+                            JOptionPane.showMessageDialog(null, "ERROR AL ACTUALIZAR " + ex);
+                        }
+
+                    }
+                }
+
+            });
+            jtblAutos.setCellSelectionEnabled(true);
+            jtblAutos.getInputMap(javax.swing.JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "selectNextColumnCell");
+            jtblAutos.setModel(model);
+            jtblAutos.getTableHeader().setReorderingAllowed(false);
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, ex + "SBBNSJSDJN");
+        }
+
+    }
+
        public void cargarmodificar(){
            jtblAutos.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
                @Override
@@ -369,6 +510,7 @@ jtblAutos.setModel(model);
             psd.executeUpdate();
             JOptionPane.showMessageDialog(this, "Se modifico Correctamente");
             cargarTablaAutos("");
+            CargarTablaAutosControles("");
             desactivarTextos();
             limpiarTextos();
         } catch (SQLException ex) {
@@ -382,7 +524,7 @@ jtblAutos.setModel(model);
        public void borrar(){
            if (JOptionPane.showConfirmDialog(new JInternalFrame(), "Estas Seguro de borrar el Registro", "Ventana borrar", JOptionPane.YES_NO_OPTION)== JOptionPane.YES_OPTION) {
                
-             String sql= "DELETE FROM AUTOS WHERE AUT_PLACA = '"+txtPlaca.getText()+"' ";
+             String sql= "UPDATE AUTOS SET AUT_ESTADO ='0' WHERE AUT_PLACA = '"+txtPlaca.getText()+"' ";
         try {
             PreparedStatement psd= cn.prepareStatement(sql);
             psd.executeUpdate();
@@ -390,6 +532,7 @@ jtblAutos.setModel(model);
             
                      
             cargarTablaAutos("");
+            CargarTablaAutosControles("");
             desactivarTextos();
             limpiarTextos();
          
@@ -407,6 +550,7 @@ jtblAutos.setModel(model);
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        cb = new javax.swing.JComboBox<>();
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
@@ -435,6 +579,9 @@ jtblAutos.setModel(model);
         jtblAutos = new javax.swing.JTable();
         jLabel8 = new javax.swing.JLabel();
         txtBuscarPlaca = new javax.swing.JTextField();
+
+        cb.setEditable(true);
+        cb.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Brando", "Marcelo" }));
 
         setBackground(new java.awt.Color(153, 204, 255));
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -492,8 +639,6 @@ jtblAutos.setModel(model);
             ex.printStackTrace();
         }
 
-        txtDescripcion.setText("textoMio1");
-
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -542,7 +687,7 @@ jtblAutos.setModel(model);
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel7)
                     .addComponent(jcbxMarca, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 38, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
                     .addComponent(jcbxModelo, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -624,6 +769,8 @@ jtblAutos.setModel(model);
             }
         });
 
+        jbtnViaje.setBackground(new java.awt.Color(255, 255, 255));
+        jbtnViaje.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagenes/viaje.png"))); // NOI18N
         jbtnViaje.setText("Viaje");
         jbtnViaje.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -660,11 +807,11 @@ jtblAutos.setModel(model);
                 .addComponent(btnCancelar, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(btnBorrar, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(btnSalir)
                 .addGap(18, 18, 18)
-                .addComponent(jbtnViaje, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(31, Short.MAX_VALUE))
+                .addComponent(jbtnViaje, javax.swing.GroupLayout.PREFERRED_SIZE, 46, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(btnSalir)
+                .addContainerGap(51, Short.MAX_VALUE))
         );
 
         jPanel3.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
@@ -759,6 +906,7 @@ jtblAutos.setModel(model);
 
     private void btnNuevoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNuevoActionPerformed
         // TODO add your handling code here:
+        txtPlaca.requestFocus();
         activarBotones();
         activarTextos();
         limpiarTextos();
@@ -813,11 +961,13 @@ jtblAutos.setModel(model);
 
     private void txtBuscarPlacaKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtBuscarPlacaKeyReleased
 cargarTablaAutos(txtBuscarPlaca.getText());
+        CargarTablaAutosControles(txtBuscarPlaca.getText());
 // TODO add your handling code here:
     }//GEN-LAST:event_txtBuscarPlacaKeyReleased
 
     private void btnActualizarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnActualizarActionPerformed
         modificar();
+        //cargarmodificar();
         // TODO add your handling code here:
     }//GEN-LAST:event_btnActualizarActionPerformed
 
@@ -828,10 +978,19 @@ cargarTablaAutos(txtBuscarPlaca.getText());
     }//GEN-LAST:event_btnBorrarActionPerformed
 
     private void jbtnViajeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbtnViajeActionPerformed
+
+
         // TODO add your handling code here:
+
+
+        
         InterfaceViajes viaje = new InterfaceViajes(txtPlaca.getText());
         
         InterfacePrincipal.jdeskprincipal.add(viaje).setVisible(true);
+         Dimension desktopSize = jdeskprincipal.getSize();
+            Dimension FrameSize = viaje.getSize();
+            viaje.setLocation((desktopSize.width - FrameSize.width) / 2, (desktopSize.height - FrameSize.height) / 2);
+            viaje.show();
         //viaje.show();
         
     }//GEN-LAST:event_jbtnViajeActionPerformed
@@ -878,6 +1037,7 @@ cargarTablaAutos(txtBuscarPlaca.getText());
     private javax.swing.JButton btnGuardar;
     private javax.swing.JButton btnNuevo;
     private javax.swing.JButton btnSalir;
+    private javax.swing.JComboBox<String> cb;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;

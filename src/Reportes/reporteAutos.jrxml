@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="null" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="284445a9-7e7e-49be-a74a-562e2a9b04dc">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<queryString>
+		<![CDATA[SELECT
+     autos.`AUT_PLACA` AS autos_AUT_PLACA,
+     autos.`MOD_CODIGO` AS autos_MOD_CODIGO,
+     autos.`AUT_ANIO` AS autos_AUT_ANIO,
+     autos.`AUT_COLOR` AS autos_AUT_COLOR,
+     autos.`AUT_CAPACIDAD` AS autos_AUT_CAPACIDAD,
+     autos.`AUT_DESCRIPCION` AS autos_AUT_DESCRIPCION,
+     autos.`AUT_ESTADO` AS autos_AUT_ESTADO,
+
+modelo.`MOD_NOMBRE` AS modelo_MOD_NOMBRE,
+marca.`MAR_NOMBRE` AS mar_MAR_NOMBRE
+
+FROM
+     `autos` autos,`modelo` modelo,`marca` marca
+WHERE marca.`MAR_CODIGO` = modelo.`MAR_CODIGO` and modelo.`MOD_CODIGO` = autos.`MOD_CODIGO`]]>
+	</queryString>
+	<field name="autos_AUT_PLACA" class="java.lang.String"/>
+	<field name="autos_MOD_CODIGO" class="java.lang.String"/>
+	<field name="autos_AUT_ANIO" class="java.lang.String"/>
+	<field name="autos_AUT_COLOR" class="java.lang.String"/>
+	<field name="autos_AUT_CAPACIDAD" class="java.lang.Integer"/>
+	<field name="autos_AUT_DESCRIPCION" class="java.lang.String"/>
+	<field name="autos_AUT_ESTADO" class="java.lang.Integer"/>
+	<field name="modelo_MOD_NOMBRE" class="java.lang.String"/>
+	<field name="mar_MAR_NOMBRE" class="java.lang.String"/>
+	<variable name="autos_AUT_PLACA_1" class="java.lang.Integer" resetType="Column" calculation="Count">
+		<variableExpression><![CDATA[$F{autos_AUT_PLACA}]]></variableExpression>
+	</variable>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="79" splitType="Stretch">
+			<textField>
+				<reportElement x="263" y="18" width="100" height="20" uuid="4b5c0150-ef12-45a2-8898-474ffc3c4a97"/>
+				<textFieldExpression><![CDATA["REPORTE AUTOS"]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="35" splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="47" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="18" width="100" height="20" uuid="336f5f51-012f-44f4-946e-f26b63c1340e"/>
+				<text><![CDATA[Placa]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="100" y="18" width="100" height="20" uuid="334f1f7d-5707-43de-b48b-543fd9da11d7"/>
+				<text><![CDATA[Marca]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="200" y="18" width="100" height="20" uuid="42cb543a-4d94-4014-9c48-8c2cb1c880f1"/>
+				<text><![CDATA[Modelo]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="300" y="18" width="100" height="20" uuid="79e3bf9e-2548-4a6c-9d65-9f913239f3ae"/>
+				<text><![CDATA[Anio]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="400" y="18" width="100" height="20" uuid="08bdc54e-88e3-448d-a6ac-ea5733a6b3f0"/>
+				<text><![CDATA[Capacidad]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="47" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="100" height="20" uuid="dfae30c8-7b49-4a6e-9a72-3e1736bbaef9"/>
+				<textFieldExpression><![CDATA[$F{autos_AUT_PLACA}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="100" y="0" width="100" height="20" uuid="8d7fadf5-ca8a-48a7-ba1f-cd097f54ae6b"/>
+				<textFieldExpression><![CDATA[$F{mar_MAR_NOMBRE}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="200" y="0" width="100" height="20" uuid="c57d72fe-66bb-40f6-b536-c891079e9b20"/>
+				<textFieldExpression><![CDATA[$F{modelo_MOD_NOMBRE}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="300" y="0" width="100" height="20" uuid="014e4936-9570-4491-95ee-da318b4f7413"/>
+				<textFieldExpression><![CDATA[$F{autos_AUT_ANIO}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="400" y="0" width="100" height="20" uuid="77b90b21-3438-4317-adc3-91b31472d29f"/>
+				<textFieldExpression><![CDATA[$F{autos_AUT_CAPACIDAD}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="45" splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="54" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="34" width="80" height="20" uuid="88ae4c3d-74ad-426a-86fc-bab28ca5bca8"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA["Pagina "+$V{PAGE_NUMBER}+" de"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="80" y="34" width="40" height="20" uuid="fbdb0db8-e681-4623-89a5-31ba7829a1aa"/>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="42" splitType="Stretch"/>
+	</summary>
+</jasperReport>
